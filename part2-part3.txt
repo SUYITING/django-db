@@ -1,0 +1,98 @@
+part2
+
+去polls/models.py 複製貼上程式碼
+去mysite/settings.py 加上 'polls.apps.PollsConfig',
+$ python manage.py makemigrations
+$ python manage.py makemigrate
+$ python manage.py shell 跑到shell的程式裡面
+>>> from polls.models import Question, Choice 先去import資料庫
+>>> Question.objects.all() 去檢查question這個table的object有哪些
+他是空的
+>>> from django.utils import timezone 然後摳timezone這個pakege進來
+>>> q = Question(question_text="What's new?", pub_date=timezone.now())
+開始寫入第一筆資料 叫做what's new? 他的時間就是現在系統的時間
+>>> q.save() 把Q這個新的資料儲存進去
+>>> q.id 結果是1
+>>> q.question_text  跑出"What's new?"
+>>> q.pub_date 發文章的時間 (現在)
+>>> q.question_text = "What's up?" 把question_text改成叫What's up?
+>>> q.save() 做儲存
+>>> Question.objects.all() 秀這個table的object有哪些
+>>> Question.objects.all()[0] 看第一個object的值 把第一個物件抓出來
+>>> Question.objects.all()[0].value
+>>> Question.objects.all()[0].question_text
+在Question貼上新的Define
+
+
+polls/models.py
+from django.db import models
+class Question(models.Model):
+# ...
+def __str__(self):
+return self.question_text
+class Choice(models.Model):
+# ...
+def __str__(self):
+return self.choice_text
+這段是代表增加字串到Question和Choice中
+
+
+polls/models.py
+import datetime
+from django.db import modelsfrom django.utils import timezone
+class Question(models.Model):
+# ...
+def was_published_recently(self):
+return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+添加一個定義方法並調整時間
+
+python manage.py shell先執行manage.py
+from polls.models import Question, Choice確認str()在運作
+Question.objects.all()看問題的物件總共有哪些
+Question.objects.filter(id=1)第一個問題是什麼
+Question.objects.filter(question_text__startswith='What')以What為開始的問題是哪一個
+from django.utils import timezone從dango.utils裡找出時區
+current_year = timezone.now().year最近一年等於現在
+Question.objects.get(pub_date__year=current_year)找出今年的問題
+Question.objects.get(id=2)找出第二個問題但可惜的是它不存在
+Question.objects.get(pk=1)找出第一個問題但慶幸的是它存在
+q = Question.objects.get(pk=1)讓q等於找出第一個問題
+q.was_published_recently()問題是在今年發佈的 答案是是
+q.choice_set.all()找出choice但是很可惜目前只有Question沒有Choice
+q.choice_set.create(choice_text='Not much', votes=0)製作第一個choice
+q.choice_set.create(choice_text='The sky', votes=0)製作第二個choice
+c = q.choice_set.create(choice_text='Just hacking again', votes=0)先製作第三個choice再讓他等於c
+c.question跑question答案是What's up????
+q.choice_set.all()跑出所有的choice唷
+q.choice_set.count()它就會細心地數出有三個choice喔
+Choice.objects.filter(question__pub_date__year=current_year)跑出今年發布的choice
+c = q.choice_set.filter(choice_text__startswith='Just hacking')讓c等於第三個選項Just hacking
+c,delete()刪除c也就是說刪除第三個選項 所以還有兩個選項呢
+之後就跳開 按住ctrl+z
+python manage.py createsuperuser執行命令並新增
+Username: admin輸入使用者名稱 如果你空白就是使用預設的使用者名稱喔
+Email address: admin@example.com輸入你的email
+Password: **********
+Password (again): *********
+Superuser created successfully打你的密碼啦 然後就成功登進去囉讚讚
+python manage.py runserver接著就執行manage.py
+
+
+polls/admin.py
+from django.contrib import admin
+from .models import Question
+admin.site.register(Question)
+在admin.py編輯 然後就多出question囉 然後在question裡更改時間
+
+part3
+
+去polls/views.py 複製貼上程式碼，往下貼不要蓋到index和之前的
+去polls/urls.py 複製貼上程式碼
+到polls/views.py修改index
+在polls開一個templates的資料夾在裡面再開polls的資料夾再開一個檔案index.html
+將程式碼貼上
+去polls/views.py重新修改index程式碼
+
+
+
+
